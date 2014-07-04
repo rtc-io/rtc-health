@@ -25,14 +25,14 @@ var Reporter = require('./lib/reporter');
 **/
 
 module.exports = function(qc, opts) {
-	opts = opts || {};
+  opts = opts || {};
 
-	var emitter = new EventEmitter();
+  var emitter = new EventEmitter();
   var targets = [];
   var timers = {};
 
   function log(pc, data) {
-  	pc.getStats(function(stats) {
+    pc.getStats(function(stats) {
         var reports = stats.result();
         var idx = targets.indexOf(data.id);
 
@@ -43,7 +43,7 @@ module.exports = function(qc, opts) {
         
         var reporter = new Reporter(qc.id, data, reports);
         emitter.emit('health:report', reporter, pc);
-		});		
+    });   
   }
 
   qc.on('peer:connect', log);
@@ -53,20 +53,20 @@ module.exports = function(qc, opts) {
     // Store that we are currently tracking the target peer
     if (targets.indexOf(data.id) <= 0) targets.push(data.id);
 
-  	monitor.on('change', function(pc) {
-			emitter.emit('health:changed', pc.iceConnectionState, pc);
-  	});
+    monitor.on('change', function(pc) {
+      emitter.emit('health:changed', pc.iceConnectionState, pc);
+    });
 
-  	monitor.on('closed', function() {
+    monitor.on('closed', function() {
 
       // Stop the reporting for this peer connection
       if (timers[data.id]) clearTimeout(timers[data.id]);
       var idx = targets.indexOf(data.id);
       if (idx >= 0) targets.splice(idx, 1);
 
-  		emitter.emit('health:closed', pc);
+      emitter.emit('health:closed', pc);
 
-  	});
+    });
 
   });
 
