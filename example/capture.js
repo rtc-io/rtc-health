@@ -26,6 +26,7 @@ localMedia.once('capture', function(stream) {
 			 }).broadcast(stream);
 
 	var monitor = health(qc, { pollInterval: 10000 });
+	var previous = null;
 	monitor.on('health:report', function(reporter) {
 
 		var statistics = [];
@@ -35,6 +36,10 @@ localMedia.once('capture', function(stream) {
 		// 	var report = channels[i];
 		// 	console.log(report.toJSON());
 		// }
-		console.log(reporter.toJSON(['googTrack', 'googComponent', 'googCertificate', 'googLibjingleSession']));
+		previous = reporter.toJSON({
+			exclude: ['googTrack', 'googComponent', 'googCertificate', 'googLibjingleSession'],
+			compareTo: previous
+		});
+		console.log(previous);
 	});
 });

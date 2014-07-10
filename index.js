@@ -30,6 +30,7 @@ module.exports = function(qc, opts) {
   var emitter = new EventEmitter();
   var targets = [];
   var timers = {};
+  var cache = {};
 
   function log(pc, data) {
     pc.getStats(function(stats) {
