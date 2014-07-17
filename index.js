@@ -3,6 +3,8 @@
 
 var EventEmitter = require('events').EventEmitter;
 var Reporter = require('./lib/reporter');
+var TrackedConnection = require('./lib/connection').TrackedConnection;
+var util = require('./lib/util');
 
 /**
   # rtc-health
@@ -28,47 +30,92 @@ module.exports = function(qc, opts) {
   opts = opts || {};
 
   var emitter = new EventEmitter();
-  var targets = [];
+  var connections = {};
   var timers = {};
-  var cache = {};
+  var logs = {};
 
-  function log(pc, data) {
+  function log(peerId, pc, data) {
     pc.getStats(function(stats) {
-        var reports = stats.result();
-        var idx = targets.indexOf(data.id);
+      var reports = stats.result();
+      var tc = connections[data.id];
 
-        // Only reschedule while we are monitoring
-        if (idx >= 0) {
-          timers[data.id] = setTimeout(log.bind(this, pc, data), opts.pollInterval || 1000);  
-        }
-        
-        var reporter = new Reporter(qc.id, data, reports);
-        emitter.emit('health:report', reporter, pc);
+      // Only reschedule while we are monitoring
+      if (tc) {
+        timers[data.id] = setTimeout(log.bind(this, peerId, pc, data), opts.pollInterval || 1000);  
+      }
+      
+      var reporter = new Reporter(qc.id, data, reports);
+      emitter.emit('health:report', reporter, pc);
     });   
   }
 
-  qc.on('peer:connect', log);
+  /**
+    Emit a generic notification event that allows for tapping into the activity that is happening
+    within quickconnect
+   **/
+  function notify(eventName, opts) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    emitter.emit('health:notify', eventName, opts, args);
+    emitter.emit.apply(emitter, (['health:' + eventName, opts].concat(args)));
+  }
 
-  qc.on('peer:couple', function(pc, data, monitor) {
+  function trackConnection(peerId, pc, data) {
+    var tc = new TrackedConnection(peerId, pc, data);
+    connections[data.id] = tc;
+    notify('started', { source: peerId, about: data.id, tracker: tc });
+    log(peerId, pc, data);
+    return tc;
+  }
+
+  /**
+    Handle the peer connection being created
+   **/
+  qc.on('peer:connect', trackConnection);
+
+  qc.on('peer:couple', function(peerId, pc, data, monitor) {
 
     // Store that we are currently tracking the target peer
-    if (targets.indexOf(data.id) <= 0) targets.push(data.id);
+    var tc = connections[data.id];
+    if (!tc) tc = trackConnection(peerId, pc, data);
 
     monitor.on('change', function(pc) {
-      emitter.emit('health:changed', pc.iceConnectionState, pc);
+      notify('icestatus', { 
+        source: qc.id, about: data.id, tracker: tc 
+      }, pc.iceConnectionState);
+      emitter.emit('health:changed', tc, pc.iceConnectionState);
     });
 
     monitor.on('closed', function() {
 
+      tc.closed();
+
       // Stop the reporting for this peer connection
       if (timers[data.id]) clearTimeout(timers[data.id]);
-      var idx = targets.indexOf(data.id);
-      if (idx >= 0) targets.splice(idx, 1);
-
-      emitter.emit('health:closed', pc);
-
+      delete connections[data.id];
+      notify('closed', { source: qc.id, about: data.id, tracker: tc });
     });
 
+  });
+
+  // Bind the signaller events
+  ['init', 'open', 'connected', 'disconnected', 'error'].forEach(function(evt) {
+    qc.on(evt, notify.bind(notify, evt, { source: qc.id, about: 'signaller' }));
+  });
+
+  // Bind peer connection events
+  [
+    'channel:opened', 'channel:closed', 
+    'stream:added', 'stream:removed', 
+    'call:started', 'call:ended'
+  ].forEach(function(evt) {
+    qc.on(evt, function(peerId) {
+      var tc = connections[peerId];
+      var args = Array.prototype.slice.call(arguments, 1);
+      return notify.apply(
+        notify, 
+        [evt, { source: qc.id, about: peerId, tracker: tc }].concat(args)
+      );
+    });
   });
 
   return emitter;

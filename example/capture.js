@@ -42,4 +42,11 @@ localMedia.once('capture', function(stream) {
 		});
 		console.log(previous);
 	});
+
+	monitor.on('health:notify', function(evt, opts, data) {
+		console.log('[%s->%s] %s', opts.source, opts.about, evt);
+		if (data && data.length > 0) {
+			console.log(JSON.stringify(data));	
+		}
+	});
 });
