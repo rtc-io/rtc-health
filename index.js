@@ -60,9 +60,9 @@ module.exports = function(qc, opts) {
   }
 
   function trackConnection(peerId, pc, data) {
-    var tc = new TrackedConnection(peerId, pc, data);
+    var tc = new TrackedConnection(qc.id, pc, data);
     connections[data.id] = tc;
-    notify('started', { source: peerId, about: data.id, tracker: tc });
+    notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
     return tc;
   }
