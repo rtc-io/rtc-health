@@ -163,5 +163,12 @@ module.exports = function(qc, opts) {
     });
   });
 
+  // Helper method to safely close all connections
+  emitter.closeConnections = function() {
+    for (var connId in connections) {
+      connections[connId].close();
+    }
+  };
+
   return emitter;
 };
