@@ -91,13 +91,26 @@ module.exports = function(qc, opts) {
 
     // Store that we are currently tracking the target peer
     var tc = connections[data.id];
+    var status = util.toStatus(pc.iceConnectionState);
+    console.log('Status - ' + status);
     if (!tc) tc = trackConnection(peerId, pc, data);
 
     monitor.on('change', function(pc) {
+      var iceConnectionState = pc.iceConnectionState;
+      console.log(iceConnectionState);
+      var newStatus = util.toStatus(iceConnectionState);
+      console.log('New status - ' + status);
       notify('icestatus', { 
         source: qc.id, about: data.id, tracker: tc 
-      }, pc.iceConnectionState);
-      emitter.emit('health:changed', tc, pc.iceConnectionState);
+      }, iceConnectionState);
+      emitter.emit('health:changed', tc, iceConnectionState);
+
+      console.log('%s = %s', status, newStatus);
+      if (status != newStatus) {
+        console.log('Notify status changed - ' + status);
+        emitter.emit('health:connection:status', tc, newStatus, status);
+        status = newStatus;
+      }
     });
 
     monitor.on('closed', function() {
@@ -114,7 +127,7 @@ module.exports = function(qc, opts) {
         about: data,
         status: 'closed',
         force: true
-      });
+      }));
 
       notify('closed', { source: qc.id, about: data.id, tracker: tc });
     });

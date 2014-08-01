@@ -49,4 +49,9 @@ localMedia.once('capture', function(stream) {
 			console.log(JSON.stringify(data));	
 		}
 	});
+
+	monitor.on('health:connection:status', function(conn, status, previousStatus) {
+		console.log(conn);
+		console.log('Status changed from %s to %s', previousStatus, status);
+	});
 });
