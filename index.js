@@ -129,9 +129,9 @@ module.exports = function(qc, opts) {
 
     if (opts.verbose) {
       OPTIONAL_MONITOR_EVENTS.forEach(function(evt) {
-        monitor.on(evt, function(peerId) {
+        monitor.on(evt, function() {
           var tc = connections[peerId];
-          var args = Array.prototype.slice.call(arguments, 1);
+          var args = Array.prototype.slice.call(arguments, 0);
           return notify.apply(
             notify, 
             [evt, { source: qc.id, about: peerId, tracker: tc }].concat(args)
