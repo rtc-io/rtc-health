@@ -53,7 +53,13 @@ module.exports = function(qc, opts) {
         timers[data.id] = setTimeout(log.bind(this, peerId, pc, data), opts.pollInterval || 1000);  
       }
       
-      var reporter = new Reporter(qc.id, data, reports);
+      var reporter = new Reporter({
+            source: qc.id, 
+            about: data,
+            pc: pc,
+            reports: reports
+          });
+
       emitter.emit('health:report', reporter, pc);
     });   
   }
@@ -101,6 +107,15 @@ module.exports = function(qc, opts) {
       // Stop the reporting for this peer connection
       if (timers[data.id]) clearTimeout(timers[data.id]);
       delete connections[data.id];
+
+      // Emit a closure status update
+      emitter.emit('health:report', new Reporter({
+        source: qc.id, 
+        about: data,
+        status: 'closed',
+        force: true
+      });
+
       notify('closed', { source: qc.id, about: data.id, tracker: tc });
     });
 

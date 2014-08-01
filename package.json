@@ -1,6 +1,6 @@
 {
   "name": "rtc-health",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Exposes health information about WebRTC connection statistics as quickconnect module",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "Nathan Oehlman",
   "license": "Apache",
   "dependencies": {
-    "rtc-quickconnect": "^2.5.0",
+    "rtc-quickconnect": "^3",
     "uuid": "^1.4.1"
   }
 }
