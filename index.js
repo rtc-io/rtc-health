@@ -6,6 +6,15 @@ var Reporter = require('./lib/reporter');
 var TrackedConnection = require('./lib/connection').TrackedConnection;
 var util = require('./lib/util');
 
+var OPTIONAL_MONITOR_EVENTS = [
+    'negotiate:request', 'negotiate:renegotiate', 'negotiate:abort',
+    'negotiate:createOffer', 'negotiate:createOffer:created', 
+    'negotiate:createAnswer', 'negotiate:createAnswer:created',
+    'negotiate:setlocaldescription',
+    'icecandidate:local', 'icecandidate:remote', 'icecandidate:gathered', 'icecandidate:added',
+    'sdp:received'
+];
+
 /**
   # rtc-health
 
@@ -94,6 +103,19 @@ module.exports = function(qc, opts) {
       delete connections[data.id];
       notify('closed', { source: qc.id, about: data.id, tracker: tc });
     });
+
+    if (opts.verbose) {
+      OPTIONAL_MONITOR_EVENTS.forEach(function(evt) {
+        monitor.on(evt, function(peerId) {
+          var tc = connections[peerId];
+          var args = Array.prototype.slice.call(arguments, 1);
+          return notify.apply(
+            notify, 
+            [evt, { source: qc.id, about: peerId, tracker: tc }].concat(args)
+          );
+        });
+      });
+    }
 
   });
 
