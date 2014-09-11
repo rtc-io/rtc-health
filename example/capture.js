@@ -23,7 +23,7 @@ localMedia.once('capture', function(stream) {
 				  { url: 'stun:stun.l.google.com:19302' }
 				],
 			    disableHeartbeat: true
-			 }).broadcast(stream);
+			 }).broadcast(stream);	
 
 	var monitor = health(qc, { pollInterval: 10000 });
 	var previous = null;

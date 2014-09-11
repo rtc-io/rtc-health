@@ -16,5 +16,8 @@
   "dependencies": {
     "rtc-quickconnect": "^2.5.0",
     "uuid": "^1.4.1"
+  },
+  "publishConfig": {
+    "registry": "http://registry.coviu.com/"
   }
 }
