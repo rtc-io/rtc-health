@@ -25,7 +25,7 @@ localMedia.once('capture', function(stream) {
 			    disableHeartbeat: true
 			 }).broadcast(stream);	
 
-	var monitor = health(qc, { pollInterval: 10000 });
+	var monitor = health(qc, { pollInterval: 10000, verbose: true });
 	var previous = null;
 	monitor.on('health:report', function(reporter) {
 
@@ -44,7 +44,7 @@ localMedia.once('capture', function(stream) {
 	});
 
 	monitor.on('health:notify', function(evt, opts, data) {
-		console.log('[%s->%s] %s', opts.source, opts.about, evt);
+		// console.log('[%s->%s] %s', opts.source, opts.about, evt);
 		if (data && data.length > 0) {
 			console.log(JSON.stringify(data));	
 		}

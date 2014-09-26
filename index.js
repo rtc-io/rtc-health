@@ -5,6 +5,7 @@ var EventEmitter = require('events').EventEmitter;
 var Reporter = require('./lib/reporter');
 var TrackedConnection = require('./lib/connection').TrackedConnection;
 var util = require('./lib/util');
+var wildcard = require('wildcard');
 
 var OPTIONAL_MONITOR_EVENTS = [
     'negotiate:request', 'negotiate:renegotiate', 'negotiate:abort',
@@ -87,14 +88,18 @@ module.exports = function(qc, opts) {
    **/
   qc.on('peer:connect', trackConnection);
 
-  qc.on('peer:couple', function(peerId, pc, data, monitor) {
+  qc.on('peer:couple', function(peerId, pc, data, monitor) {    
+
+    monitor.feed(function(evt) {
+      console.log('mon: %s', evt.name);
+    })
 
     // Store that we are currently tracking the target peer
     var tc = connections[data.id];
     var status = util.toStatus(pc.iceConnectionState);
     if (!tc) tc = trackConnection(peerId, pc, data);
 
-    monitor.on('change', function(pc) {
+    monitor.on('statechange', function(pc, state) {
       var iceConnectionState = pc.iceConnectionState;
       var newStatus = util.toStatus(iceConnectionState);
       notify('icestatus', { 
@@ -127,9 +132,17 @@ module.exports = function(qc, opts) {
       notify('closed', { source: qc.id, about: data.id, tracker: tc });
     });
 
-    if (opts.verbose) {
+  });
+
+  // Setup to listen to the entire feed
+  qc.feed(function(evt) {
+    var name = evt.name;
+
+    // Listen for the optional verbose events
+    if (opts.verbose && wildcard('pc.*', name)) {
       OPTIONAL_MONITOR_EVENTS.forEach(function(evt) {
         monitor.on(evt, function() {
+          // TODO - Need to get the peer id somehow from the event name
           var tc = connections[peerId];
           var args = Array.prototype.slice.call(arguments, 0);
           return notify.apply(
@@ -139,7 +152,7 @@ module.exports = function(qc, opts) {
         });
       });
     }
-
+    
   });
 
   // Bind the signaller events
