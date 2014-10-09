@@ -137,7 +137,7 @@ module.exports = function(qc, opts) {
     if (util.SIGNALLER_EVENTS.indexOf(name) >= 0) {
       return notify.apply(
         notify, 
-        [name, { source: qc.id, about: 'signaller' }].concat(args)
+        [name, { source: qc.id, about: 'signaller' }].concat(evt.args)
       );
     }
 
@@ -147,10 +147,9 @@ module.exports = function(qc, opts) {
       var peerId = matching[1];
       var shortName = matching.slice(2).join('.');
       var tc = connections[peerId];
-      var args = Array.prototype.slice.call(arguments, 0);
       return notify.apply(
         notify, 
-        [shortName, { source: qc.id, about: peerId, tracker: tc }].concat(args)
+        [shortName, { source: qc.id, about: peerId, tracker: tc }].concat(evt.args)
       );
     }
   });
