@@ -44,7 +44,7 @@ localMedia.once('capture', function(stream) {
 	});
 
 	monitor.on('health:notify', function(evt, opts, data) {
-		// console.log('[%s->%s] %s', opts.source, opts.about, evt);
+		console.log('[%s->%s] %s', opts.source, opts.about, evt);
 		if (data && data.length > 0) {
 			console.log(JSON.stringify(data));	
 		}

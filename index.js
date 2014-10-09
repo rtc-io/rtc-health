@@ -90,10 +90,6 @@ module.exports = function(qc, opts) {
 
   qc.on('peer:couple', function(peerId, pc, data, monitor) {    
 
-    monitor.feed(function(evt) {
-      console.log('mon: %s', evt.name);
-    })
-
     // Store that we are currently tracking the target peer
     var tc = connections[data.id];
     var status = util.toStatus(pc.iceConnectionState);
@@ -114,7 +110,7 @@ module.exports = function(qc, opts) {
     });
 
     monitor.on('closed', function() {
-
+      
       tc.closed();
 
       // Stop the reporting for this peer connection
@@ -138,42 +134,25 @@ module.exports = function(qc, opts) {
   qc.feed(function(evt) {
     var name = evt.name;
 
-    // Listen for the optional verbose events
-    if (opts.verbose && wildcard('pc.*', name)) {
-      OPTIONAL_MONITOR_EVENTS.forEach(function(evt) {
-        monitor.on(evt, function() {
-          // TODO - Need to get the peer id somehow from the event name
-          var tc = connections[peerId];
-          var args = Array.prototype.slice.call(arguments, 0);
-          return notify.apply(
-            notify, 
-            [evt, { source: qc.id, about: peerId, tracker: tc }].concat(args)
-          );
-        });
-      });
-    }
-    
-  });
-
-  // Bind the signaller events
-  ['init', 'open', 'connected', 'disconnected', 'error'].forEach(function(evt) {
-    qc.on(evt, notify.bind(notify, evt, { source: qc.id, about: 'signaller' }));
-  });
-
-  // Bind peer connection events
-  [
-    'channel:opened', 'channel:closed', 
-    'stream:added', 'stream:removed', 
-    'call:started', 'call:ended'
-  ].forEach(function(evt) {
-    qc.on(evt, function(peerId) {
-      var tc = connections[peerId];
-      var args = Array.prototype.slice.call(arguments, 1);
+    if (util.SIGNALLER_EVENTS.indexOf(name) >= 0) {
       return notify.apply(
         notify, 
-        [evt, { source: qc.id, about: peerId, tracker: tc }].concat(args)
+        [name, { source: qc.id, about: 'signaller' }].concat(args)
       );
-    });
+    }
+
+    // Listen for the optional verbose events
+    var matching = opts.verbose && wildcard('pc.*', name);
+    if (matching) {
+      var peerId = matching[1];
+      var shortName = matching.slice(2).join('.');
+      var tc = connections[peerId];
+      var args = Array.prototype.slice.call(arguments, 0);
+      return notify.apply(
+        notify, 
+        [shortName, { source: qc.id, about: peerId, tracker: tc }].concat(args)
+      );
+    }
   });
 
   // Helper method to safely close all connections
