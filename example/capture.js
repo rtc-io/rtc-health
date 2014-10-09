@@ -54,4 +54,6 @@ localMedia.once('capture', function(stream) {
 		console.log(conn);
 		console.log('Status changed from %s to %s', previousStatus, status);
 	});
+
+	window.monitor = monitor;
 });

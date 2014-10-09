@@ -3,7 +3,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 var Reporter = require('./lib/reporter');
-var TrackedConnection = require('./lib/connection').TrackedConnection;
+var MonitoredConnection = require('./lib/connection').MonitoredConnection;
 var util = require('./lib/util');
 var wildcard = require('wildcard');
 
@@ -76,7 +76,7 @@ module.exports = function(qc, opts) {
   }
 
   function trackConnection(peerId, pc, data) {
-    var tc = new TrackedConnection(qc.id, pc, data);
+    var tc = new MonitoredConnection(qc.id, pc, data);
     connections[data.id] = tc;
     notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
@@ -160,6 +160,15 @@ module.exports = function(qc, opts) {
       connections[connId].close();
     }
   };
+
+  // Helper method to expose the current tracked connections
+  emitter.getConnections = function() {
+    var results = [];
+    for (var target in connections) {
+      results.push(connections[target]);
+    }
+    return results;
+  }
 
   return emitter;
 };
