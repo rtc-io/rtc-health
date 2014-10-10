@@ -13,7 +13,14 @@
     "rtc-quickconnect": "^3.0.0"
   },
   "author": "Nathan Oehlman",
-  "license": "Apache",
+  "license": "Apache 2.0",
+  "contributors": [
+    {
+      "name": "Nathan Oehlman",
+      "email": "nathan.oehlman@nicta.com.au",
+      "url": "https://github.com/nathanoehlman"
+    }
+  ],
   "dependencies": {
     "mbus": "^1.3.1",
     "uuid": "^1.4.1",
