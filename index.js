@@ -4,7 +4,9 @@
 var EventEmitter = require('events').EventEmitter;
 var Reporter = require('./lib/reporter');
 var MonitoredConnection = require('./lib/connection').MonitoredConnection;
+var error = require('./lib/error');
 var util = require('./lib/util');
+var provider = require('./lib/provider');
 var wildcard = require('wildcard');
 
 var OPTIONAL_MONITOR_EVENTS = [
@@ -35,8 +37,12 @@ var OPTIONAL_MONITOR_EVENTS = [
   This captures data for video streaming
 
 **/
-
 module.exports = function(qc, opts) {
+
+  if (!provider) {
+    console.log('WARNING! No WebRTC provider detected');
+  }
+
   opts = opts || {};
 
   var emitter = new EventEmitter();
@@ -45,8 +51,8 @@ module.exports = function(qc, opts) {
   var logs = {};
 
   function log(peerId, pc, data) {
-    pc.getStats(function(stats) {
-      var reports = stats.result();
+    provider.getStats(pc, null, function(err, reports) {
+      console.log(reports);
       var tc = connections[data.id];
 
       // Only reschedule while we are monitoring
@@ -70,6 +76,7 @@ module.exports = function(qc, opts) {
     within quickconnect
    **/
   function notify(eventName, opts) {
+    console.log(arguments);
     var args = Array.prototype.slice.call(arguments, 2);
     emitter.emit('health:notify', eventName, opts, args);
     emitter.emit.apply(emitter, (['health:' + eventName, opts].concat(args)));
