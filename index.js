@@ -40,7 +40,8 @@ var OPTIONAL_MONITOR_EVENTS = [
 module.exports = function(qc, opts) {
 
   if (!provider) {
-    console.log('WARNING! No WebRTC provider detected');
+    console.log('WARNING! No WebRTC provider detected - rtc-health is disabled');
+    return;
   }
 
   opts = opts || {};
@@ -52,7 +53,6 @@ module.exports = function(qc, opts) {
 
   function log(peerId, pc, data) {
     provider.getStats(pc, null, function(err, reports) {
-      console.log(reports);
       var tc = connections[data.id];
 
       // Only reschedule while we are monitoring
@@ -76,7 +76,6 @@ module.exports = function(qc, opts) {
     within quickconnect
    **/
   function notify(eventName, opts) {
-    console.log(arguments);
     var args = Array.prototype.slice.call(arguments, 2);
     emitter.emit('health:notify', eventName, opts, args);
     emitter.emit.apply(emitter, (['health:' + eventName, opts].concat(args)));
