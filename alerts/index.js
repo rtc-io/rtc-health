@@ -33,8 +33,6 @@ module.exports = function(monitor, opts) {
       alerts[type] = [];
     }
 
-    name = 'warnings:'+name;
-
     var emit = function(data) {
       alerter.emit(name, data);
     };
