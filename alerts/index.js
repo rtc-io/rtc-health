@@ -6,11 +6,11 @@ var EventEmitter = require('eventemitter3');
 // user-friendly events that might be suitable for updating a UI.
 
 module.exports = function(monitor, opts) {
-	opts = opts || {};
+  opts = opts || {};
 
   if (!monitor) throw new Error('alerts must be given a monitor');
 
-	var alerter = new EventEmitter();
+  var alerter = new EventEmitter();
   // These alerts are not dependent on any peer, and are supplied information
   // on all connected peers.
   var globalAlerts = {};
@@ -52,16 +52,16 @@ module.exports = function(monitor, opts) {
     });
   }
 
-	// Listen for health reports on all qc connections and monitor the statistics
-	// we're interested in. This callback happens regularly, once for each peer
-	// connection.
-	monitor.on('health:report', function(reporter) {
+  // Listen for health reports on all qc connections and monitor the statistics
+  // we're interested in. This callback happens regularly, once for each peer
+  // connection.
+  monitor.on('health:report', function(reporter) {
     doAlerts(globalAlerts, reporter);
     var peer = reporter.target;
     if (peerAlerts[peer]) {
       doAlerts(peerAlerts[peer], reporter);
     }
-	});
+  });
 
   function doAlerts(alerts, reporter) {
     reporter.reports.forEach(function(report) {
@@ -74,5 +74,5 @@ module.exports = function(monitor, opts) {
     });
   }
 
-	return alerter;
+  return alerter;
 };
