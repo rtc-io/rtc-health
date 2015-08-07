@@ -5,6 +5,10 @@ module.exports = function(type, property, opts) {
     throw new Error('threshold needs a type and property/ies!');
   }
 
+  if (!opts.threshold || !opts.period) {
+    throw new Error('threshold requires threshold and period options');
+  }
+
   var properties = typeof property === 'string'
     ? [property]
     : (property || []);
