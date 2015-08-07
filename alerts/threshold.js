@@ -7,7 +7,7 @@ module.exports = function(type, properties, opts) {
   // All state should be kept in the context.
   var period = opts.period;
   var threshold = opts.threshold;
-  var doFirstUpdate = opts.firstUpdate;
+  var doFirstUpdate = opts.alwaysAlertOnFirstReport;
 
   // We accept a single property name or a list of them. In the case of the
   // former, convert it to a list.

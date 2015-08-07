@@ -5,9 +5,8 @@ var EventEmitter = require('eventemitter3');
 // the rtc connections in great detail; this module provides high-level
 // user-friendly events that might be suitable for updating a UI.
 
-module.exports = function(qc, opts) {
+module.exports = function(monitor, opts) {
 	opts = opts || {};
-  var monitor = opts.monitor;
 
   if (!monitor) throw new Error('alerts must be given a monitor');
 
