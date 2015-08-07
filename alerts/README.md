@@ -68,6 +68,21 @@ You can also monitor multiple statistics at the same time:
 var bothStat = stats('videoBwe', ['availableSendBandwidth', 'availableReceiveBandwidth']);
 ```
 
+### Average
+
+The `average` alert type will calculate average statistics for all connected peers.
+
+```js
+var stats = require('rtc-health/alerts/stats');
+var averageSendBw = average('videoBwe', 'availableSendBandwidth');
+alerter.addAlert('stat:avgsendbw', sendStat);
+alerter.on('stat:avgsendbw', function(data) {
+  console.log('average send bandwidth:', data.availableSendBandwidth);
+});
+```
+
+As with the `stats` type, you can pass multiple property names.
+
 ### Threshold
 
 This alert type emits events when the monitored statistic(s) crosses some threshold.
