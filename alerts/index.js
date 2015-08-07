@@ -17,18 +17,18 @@ module.exports = function(monitor, opts) {
   // These alerts are only given information about a specific peer.
   var peerAlerts = {};
 
-  alerter.addAlert = function(name, callback, opts) {
-    opts = opts || {};
+  alerter.addAlert = function(name, callback, addOpts) {
+    addOpts = addOpts || {};
     var type = callback.type;
     if (!type) {
       throw new Error('alert callback has no type; is it a real callback?');
     }
 
-    if (opts.peer && !peerAlerts[opts.peer]) {
-      peerAlerts[opts.peer] = {};
+    if (addOpts.peer && !peerAlerts[addOpts.peer]) {
+      peerAlerts[addOpts.peer] = {};
     }
 
-    var alerts = opts.peer ? peerAlerts[opts.peer] : globalAlerts;
+    var alerts = addOpts.peer ? peerAlerts[addOpts.peer] : globalAlerts;
     if (!alerts[type]) {
       alerts[type] = [];
     }
@@ -39,12 +39,12 @@ module.exports = function(monitor, opts) {
 
     var context = {};
     if (callback.init) {
-      callback.init(context, emit);
+      callback.init(context, emit, addOpts, opts);
     }
 
     alerts[type].push({
       callback: callback,
-      opts: opts,
+      opts: addOpts,
       context: context,
       emit: emit,
     });
@@ -54,10 +54,12 @@ module.exports = function(monitor, opts) {
   // we're interested in. This callback happens regularly, once for each peer
   // connection.
   monitor.on('health:report', function(reporter) {
-    doAlerts(globalAlerts, reporter);
-    var peer = reporter.target;
-    if (peerAlerts[peer]) {
-      doAlerts(peerAlerts[peer], reporter);
+    if (reporter.reports) {
+      doAlerts(globalAlerts, reporter);
+      var peer = reporter.target;
+      if (peerAlerts[peer]) {
+        doAlerts(peerAlerts[peer], reporter);
+      }
     }
   });
 
