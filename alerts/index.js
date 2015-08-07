@@ -36,13 +36,20 @@ module.exports = function(qc, opts) {
 
     name = 'warnings:'+name;
 
+    var emit = function(data) {
+      alerter.emit(name, data);
+    };
+
+    var context = {};
+    if (callback.init) {
+      callback.init(context, emit);
+    }
+
     alerts[type].push({
       callback: callback,
       opts: opts,
-      context: {},
-      emit: function(data) {
-        alerter.emit(name, data);
-      },
+      context: context,
+      emit: emit,
     });
   }
 
@@ -62,11 +69,7 @@ module.exports = function(qc, opts) {
       var type = report.type;
       if (alerts[type]) {
         alerts[type].forEach(function(alertData) {
-          alertData.callback(
-            report, reporter,
-            alertData.emit,
-            alertData.context
-          );
+          alertData.callback(report, reporter, alertData.context);
         });
       }
     });
