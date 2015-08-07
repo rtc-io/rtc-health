@@ -43,7 +43,30 @@ alerts.on('warning:friendBandwidth', function(data) {
 
 ## Alert types
 
-Currently, only the `threshold` alerter exists.
+### Stats
+
+The `stats` alerter simply re-emits statistics as soon as they come in, but allows you to more nicely select just the stats you want.
+
+```js
+var stats = require('rtc-health/alerts/stats');
+var sendStat = stats('videoBwe', 'availableSendBandwidth');
+alerter.addAlert('stat:sendbw', sendStat);
+alerter.on('stat:sendbw', function(data) {
+  console.log('peer id:', data.peer);
+  console.log('send bandwidth:', data.stats.availableSendBandwidth);
+});
+```
+
+The frequency these events will be emitted depends on:
+
+ * The monitoring period of the health monitor you create
+ * The number of peers (each peer is checked, unless you attach this monitor to a specific peer)
+
+You can also monitor multiple statistics at the same time:
+
+```js
+var bothStat = stats('videoBwe', ['availableSendBandwidth', 'availableReceiveBandwidth']);
+```
 
 ### Threshold
 
