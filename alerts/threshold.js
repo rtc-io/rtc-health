@@ -9,6 +9,8 @@ module.exports = function(type, property, opts) {
     ? [property]
     : (property || []);
 
+  var interval;
+
   // 'Member' variables for this particular alerter. Note that one alerter might
   // be 'instantiated' multiple times by being added in different ways, so these
   // one-time variables should only be things that relate to the input arguments.
@@ -32,7 +34,7 @@ module.exports = function(type, property, opts) {
     return value.low;
   }
 
-  function init(context, emit) {
+  function init(context, emit, myOpts, opts) {
     context.peerStates = {};
     context.firstUpdate = true;
 
@@ -41,6 +43,8 @@ module.exports = function(type, property, opts) {
     context.outputSignal = lowpassEdges(function (anyLow) {
       emit(makeWarning(anyLow));
     }, period);
+
+    interval = opts.pollInterval;
   }
 
   function onStatsReport(report, reporter, context, emit) {
@@ -84,7 +88,7 @@ module.exports = function(type, property, opts) {
 
   function recent(value) {
     var now = +(new Date());
-    return (now - value.lastUpdate) < 2*period;
+    return (now - value.lastUpdate) < 1.5 * interval;
   }
 
   onStatsReport.type = type;

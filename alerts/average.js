@@ -7,9 +7,14 @@ module.exports = function(type, property, opts) {
     ? [property]
     : (property || []);
 
-  // Called once when we are added to an alerter. Both arguments to this function
+  var interval;
+
+  // Called once when we are added to an alerter. All arguments to this function
   // are unique to this instance of the alerter being added.
-  function init(context, emit) {
+  // 'emit' should be called when we want to emit an event, and opts and myOpts
+  // are the options the alerter was created with, and the options we were added
+  // with, respectively.
+  function init(context, emit, myOpts, opts) {
     // Because we may be listening to updates from many peers, we'll keep unique
     // statistics for each of them.
     context.peerStates = {};
@@ -17,6 +22,8 @@ module.exports = function(type, property, opts) {
     // The epoch counter ensures we only create an event when all active peers
     // have had a chance to report their stats.
     context.epoch = 0;
+
+    interval = opts.pollInterval;
   }
 
   // When we receive a report, analyse it for the conditions we care about.
@@ -26,7 +33,7 @@ module.exports = function(type, property, opts) {
       context.peerStates[reporter.target] = {stats: {}};
     }
     var state = context.peerStates[reporter.target];
-    state.lastUpdated = +(new Date());
+    state.lastUpdate = +(new Date());
     state.epoch = context.epoch;
 
     // Copy the stats into the peer state.
@@ -39,7 +46,8 @@ module.exports = function(type, property, opts) {
 
     // If all active peers have the same epoch, we can calculate and report an
     // average statistic!
-    if (activePeers.every(function(peer) { return peer.epoch === context.epoch; })) {
+    var currentEpoch = function(peer) { return peer.epoch === context.epoch; };
+    if (activePeers.length && activePeers.every(currentEpoch)) {
       var averages = {};
       properties.forEach(function(prop) {
         averages[prop] = 0;
@@ -66,7 +74,7 @@ module.exports = function(type, property, opts) {
   // while. 'A while' is subjective.
   function recent(value) {
     var now = +(new Date());
-    return (now - value.lastUpdate) < 1.5 * period;
+    return (now - value.lastUpdate) < 1.5 * interval;
   }
 
   onStatsReport.type = type;

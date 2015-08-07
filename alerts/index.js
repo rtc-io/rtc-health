@@ -7,6 +7,7 @@ var EventEmitter = require('eventemitter3');
 
 module.exports = function(monitor, opts) {
   opts = opts || {};
+  opts.pollInterval = opts.pollInterval || 10000;
 
   if (!monitor) throw new Error('alerts must be given a monitor');
 
