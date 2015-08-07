@@ -17,7 +17,7 @@ module.exports = function(type, property, opts) {
       stats[prop] = report.data[prop];
     });
 
-    context.emit({
+    emit({
       peer: reporter.target,
       stats: stats,
     });

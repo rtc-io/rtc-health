@@ -68,7 +68,7 @@ module.exports = function(monitor, opts) {
       var type = report.type;
       if (alerts[type]) {
         alerts[type].forEach(function(alertData) {
-          alertData.callback(report, reporter, alertData.context);
+          alertData.callback(report, reporter, alertData.context, alertData.emit);
         });
       }
     });
