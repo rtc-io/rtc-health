@@ -38,7 +38,10 @@ module.exports = function(type, property, opts) {
     return value.low;
   }
 
-  function init(context, emit, myOpts, opts) {
+  function init(monitor, context, emit, myOpts, opts) {
+    if (monitor.pollInterval >= period) {
+      throw new Error('Threshold period must be greater than the monitor polling interval');
+    }
     context.peerStates = {};
     context.firstUpdate = true;
 

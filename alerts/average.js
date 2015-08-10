@@ -14,7 +14,7 @@ module.exports = function(type, property, opts) {
   // 'emit' should be called when we want to emit an event, and opts and myOpts
   // are the options the alerter was created with, and the options we were added
   // with, respectively.
-  function init(context, emit, myOpts, opts) {
+  function init(monitor, context, emit, myOpts, opts) {
     // Because we may be listening to updates from many peers, we'll keep unique
     // statistics for each of them.
     context.peerStates = {};

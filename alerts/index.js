@@ -40,7 +40,7 @@ module.exports = function(monitor, opts) {
 
     var context = {};
     if (callback.init) {
-      callback.init(context, emit, addOpts, opts);
+      callback.init(monitor, context, emit, addOpts, opts);
     }
 
     alerts[type].push({
