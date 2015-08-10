@@ -1,1 +1,2 @@
-require('./health-test');
+// require('./health-test');
+require('./alerts-test');
