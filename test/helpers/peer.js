@@ -1,5 +1,5 @@
 var quickconnect = require('rtc-quickconnect');
-var health = require('..');
+var health = require('../..');
 
 exports.peerCreator = function(signallingServer, opts) {
 	opts = opts || {};

@@ -1,8 +1,8 @@
 var test = require('tape');
 var room = 'rtchealth-ut-' + require('uuid').v4();
 var signallingServer = 'http://rtc.io/switchboard/';
-var helper = require('./helper');
-var newPeer = helper.peerCreator(signallingServer, { room: room, monitorOpts: { pollInterval: 1000 } });
+var peerHelper = require('./helpers/peer');
+var newPeer = peerHelper.peerCreator(signallingServer, { room: room, monitorOpts: { pollInterval: 1000 } });
 var alerter = require('../alerts');
 var threshold = require('../alerts/threshold');
 
