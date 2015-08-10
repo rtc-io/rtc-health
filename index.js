@@ -47,6 +47,7 @@ module.exports = function(qc, opts) {
   opts = opts || {};
 
   var emitter = new EventEmitter();
+  emitter.pollInterval = opts.pollInterval || 1000;
   var connections = {};
   var timers = {};
   var logs = {};
@@ -57,7 +58,7 @@ module.exports = function(qc, opts) {
 
       // Only reschedule while we are monitoring
       if (tc) {
-        timers[data.id] = setTimeout(log.bind(this, peerId, pc, data), opts.pollInterval || 1000);  
+        timers[data.id] = setTimeout(log.bind(this, peerId, pc, data), emitter.pollInterval);
       }
       
       var reporter = new Reporter({
