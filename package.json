@@ -4,14 +4,17 @@
   "description": "Exposes health information about WebRTC connection statistics as quickconnect module",
   "main": "index.js",
   "scripts": {
-    "test": "testling -x ./.travis/start-$BROWSER.sh"
+    "test": "browserify -t brfs test/all.js | broth start"
   },
   "devDependencies": {
+    "brfs": "^1.4.0",
+    "broth": "^2.1.1",
     "crel": "^1",
     "rtc-captureconfig": "~0.4.0",
     "rtc-media": "^1",
     "rtc-quickconnect": "^4.0.0",
-    "tape": "^3.0.3"
+    "tape": "^3.0.3",
+    "travis-multirunner": "^2.7.1"
   },
   "author": "Nathan Oehlman",
   "license": "Apache 2.0",
