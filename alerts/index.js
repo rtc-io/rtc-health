@@ -39,16 +39,36 @@ module.exports = function(monitor, opts) {
     };
 
     var context = {};
-    if (callback.init) {
-      callback.init(monitor, context, emit, addOpts, opts);
-    }
-
-    alerts[type].push({
+    var alert = {
+      name: name,
       callback: callback,
       opts: addOpts,
       context: context,
       emit: emit,
-    });
+      active: (callback.init ? false : true)
+    };
+
+    // Initialize the alert handler
+    if (callback.init) {
+      // An initialize method should either return a boolean indicating the active status of the
+      // alert, or use the callbacks for async setup/error information
+      alert.active = !!callback.init(monitor, context, emit, addOpts, opts, function(err) {
+        if (err) {
+          alert.error = err;
+          console.error(err);
+        } else {
+          alert.active = true;
+        }
+      });
+    }
+
+    // Add the alert to the appropriate alerts list
+    alerts[type].push(alert);
+  }
+
+  // Returns the alerts for a given peer, or if no peer is supplied, the global alerts
+  alerter.getAlerts = function(peer) {
+    return (peer ? peerAlerts[peer] : globalAlerts);
   }
 
   // Listen for health reports on all qc connections and monitor the statistics
@@ -69,6 +89,7 @@ module.exports = function(monitor, opts) {
       var type = report.type;
       if (alerts[type]) {
         alerts[type].forEach(function(alertData) {
+          if (!alertData.active) return;
           alertData.callback(report, reporter, alertData.context, alertData.emit);
         });
       }
