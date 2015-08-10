@@ -3,6 +3,8 @@ var captureConfig = require('rtc-captureconfig');
 var media = require('rtc-media');
 var health = require('../');
 var crel = require('crel');
+var alerter = require('../alerts');
+var threshold = require('../alerts/threshold');
 
 // capture local media
 var localMedia = media({
@@ -42,7 +44,8 @@ localMedia.once('capture', function(stream) {
 		console.log(data);
 	});
 
-	var monitor = health(qc, { pollInterval: 10000, verbose: true });
+	var monitor = health(qc, { pollInterval: 2500, verbose: true });
+	var alerts = alerter(monitor);
 	var previous = null;
 	monitor.on('health:report', function(reporter) {
 
@@ -69,6 +72,22 @@ localMedia.once('capture', function(stream) {
 
 	monitor.on('health:connection:status', function(conn, status, previousStatus) {
 		console.log('Status changed from %s to %s', previousStatus, status);
+	});
+
+	var lowSendBandwidth = threshold('videoBwe', 'availableSendBandwidth', {
+		threshold: 1e6,  // Mbit/s
+		period: 10*1000 // ms
+	});
+
+	// Calling addAlert by default will monitor for this alert on _all_ peer connections.
+	alerts.addAlert('warning:bandwidth', lowSendBandwidth);
+
+	// Listen for the named event to receive updates:
+	alerts.on('warning:bandwidth', function(data) {
+		// Fires whenever the minimum of the available bandwidth among all peers crosses
+		// 1Mbps for 10 seconds or more.
+		console.log('there is', data.low ? 'a' : 'no', 'bandwidth problem');
+		console.log(data);
 	});
 
 	window.monitor = monitor;
