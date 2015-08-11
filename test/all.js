@@ -1,2 +1,2 @@
-// require('./health-test');
-require('./alerts-test');
+require('./health-test')(location.origin);
+require('./alerts-test')(location.origin);
