@@ -15,9 +15,8 @@ module.exports = function(type, property, opts) {
   // are the options the alerter was created with, and the options we were added
   // with, respectively.
   function init(monitor, context, emit, myOpts, opts, callback) {
-    if (monitor.pollInterval >= period) {
-      return callback('Threshold period must be greater than the monitor polling interval');
-    }
+    interval = monitor.pollInterval;
+
     // Because we may be listening to updates from many peers, we'll keep unique
     // statistics for each of them.
     context.peerStates = {};
@@ -26,7 +25,6 @@ module.exports = function(type, property, opts) {
     // have had a chance to report their stats.
     context.epoch = 0;
 
-    interval = opts.pollInterval;
     return callback();
   }
 

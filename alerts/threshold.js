@@ -42,6 +42,8 @@ module.exports = function(type, property, opts) {
     if (monitor.pollInterval >= period) {
       return callback('Threshold period must be greater than the monitor polling interval');
     }
+    interval = monitor.pollInterval;
+
     context.peerStates = {};
     context.firstUpdate = true;
 
@@ -51,7 +53,6 @@ module.exports = function(type, property, opts) {
       emit(makeWarning(anyLow));
     }, period);
 
-    interval = opts.pollInterval;
     return callback;
   }
 
