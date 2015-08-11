@@ -18,6 +18,7 @@
     "rtc-signaller": "^6.2.1",
     "rtc-switchboard": "^3.0.0",
     "rtc-switchboard-messenger": "^1.2.0",
+    "tap-spec": "^4.0.2",
     "tape": "^3.0.3",
     "travis-multirunner": "^2.7.2"
   },
