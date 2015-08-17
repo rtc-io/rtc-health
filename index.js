@@ -72,6 +72,33 @@ module.exports = function(qc, opts) {
     });   
   }
 
+  var doomCountdowns = {};
+  var haveEndedCandidates = {};
+  var haveCompletedGather = {};
+
+  function checkDoomCountdown(peerId) {
+    if (doomCountdowns[peerId]) {
+      return;
+    }
+
+    if (haveEndedCandidates[peerId] && haveCompletedGather[peerId]) {
+      doomCountdowns[peerId] = setTimeout(function() {
+        console.log('AAAAAAAAARRRRRGHHH failed to connect to peer %s', peerId);
+        endDoomCountdown(peerId);
+      }, 10 * 1000);
+    }
+  }
+
+  function endDoomCountdown(peerId) {
+    var doom = doomCountdowns[peerId];
+    if (doom) {
+      clearTimeout(doom);
+    }
+    delete doomCountdowns[peerId];
+    delete haveEndedCandidates[peerId];
+    delete haveCompletedGather[peerId];
+  }
+
   /**
     Emit a generic notification event that allows for tapping into the activity that is happening
     within quickconnect
@@ -87,8 +114,18 @@ module.exports = function(qc, opts) {
     connections[data.id] = tc;
     notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
+    var gatherEvent = 'pc.' + peerId + '.ice.gathercomplete';
+    qc.on(gatherEvent, function() {
+      haveCompletedGather[peerId] = true;
+      checkDoomCountdown(peerId);
+    });
     return tc;
   }
+
+  qc.on('message:endofcandidates', function(msg, peer, raw) {
+    haveEndedCandidates[peer.id] = true;
+    checkDoomCountdown(peer.id);
+  });
 
   /**
     Handle the peer connection being created
@@ -113,6 +150,10 @@ module.exports = function(qc, opts) {
       if (status != newStatus) {
         emitter.emit('health:connection:status', tc, newStatus, status);
         status = newStatus;
+
+        if (status === 'connected') {
+          endDoomCountdown(peerId);
+        }
       }
     });
 
