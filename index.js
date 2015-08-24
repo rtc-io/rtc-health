@@ -127,7 +127,7 @@ module.exports = function(qc, opts) {
         status = newStatus;
 
         if (status === 'connected') {
-          failureTracker(peer.id).reset();
+          failureTracker(peerId).reset();
         }
       }
     });
