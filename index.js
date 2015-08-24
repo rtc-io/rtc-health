@@ -91,8 +91,7 @@ module.exports = function(qc, opts) {
     connections[data.id] = tc;
     notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
-    var gatherEvent = 'pc.' + peerId + '.ice.gathercomplete';
-    qc.on(gatherEvent, function() {
+    qc.on('pc.' + peerId + '.ice.gathercomplete', function() {
       failureTracker(peerId).gatherIsComplete();
     });
     return tc;
