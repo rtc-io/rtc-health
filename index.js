@@ -52,7 +52,7 @@ module.exports = function(qc, opts) {
   var connections = {};
   var timers = {};
   var logs = {};
-  var failureTracker = trackFailures(function(peerId) {
+  var failureTracker = trackFailures(function onConnectionFailure(peerId) {
     emitter.emit('health:connection:failure', {peer: peerId});
   });
 
