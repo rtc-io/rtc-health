@@ -8,6 +8,7 @@ var error = require('./lib/error');
 var util = require('./lib/util');
 var provider = require('./lib/provider');
 var wildcard = require('wildcard');
+var trackFailures = require('./lib/failureTracking');
 
 var OPTIONAL_MONITOR_EVENTS = [
     'negotiate:request', 'negotiate:renegotiate', 'negotiate:abort',
@@ -51,6 +52,9 @@ module.exports = function(qc, opts) {
   var connections = {};
   var timers = {};
   var logs = {};
+  var failureTracker = trackFailures(function onConnectionFailure(peerId) {
+    emitter.emit('health:connection:failure', {peer: peerId});
+  });
 
   function log(peerId, pc, data) {
     provider.getStats(pc, null, function(err, reports) {
@@ -87,8 +91,15 @@ module.exports = function(qc, opts) {
     connections[data.id] = tc;
     notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
+    qc.on('pc.' + peerId + '.ice.gathercomplete', function() {
+      failureTracker(peerId).gatherIsComplete();
+    });
     return tc;
   }
+
+  qc.on('message:endofcandidates', function(msg, peer, raw) {
+    failureTracker(peer.id).candidatesHaveEnded();
+  });
 
   /**
     Handle the peer connection being created
@@ -113,6 +124,10 @@ module.exports = function(qc, opts) {
       if (status != newStatus) {
         emitter.emit('health:connection:status', tc, newStatus, status);
         status = newStatus;
+
+        if (status === 'connected') {
+          failureTracker(peerId).reset();
+        }
       }
     });
 
