@@ -8,7 +8,7 @@ var error = require('./lib/error');
 var util = require('./lib/util');
 var provider = require('./lib/provider');
 var wildcard = require('wildcard');
-var failureTracking = require('./lib/failureTracking');
+var trackFailures = require('./lib/failureTracking');
 
 var OPTIONAL_MONITOR_EVENTS = [
     'negotiate:request', 'negotiate:renegotiate', 'negotiate:abort',
@@ -52,6 +52,9 @@ module.exports = function(qc, opts) {
   var connections = {};
   var timers = {};
   var logs = {};
+  var failureTracker = trackFailures(function(peerId) {
+    emitter.emit('health:connection:failure', {peer: peerId});
+  });
 
   function log(peerId, pc, data) {
     provider.getStats(pc, null, function(err, reports) {
@@ -90,15 +93,13 @@ module.exports = function(qc, opts) {
     log(peerId, pc, data);
     var gatherEvent = 'pc.' + peerId + '.ice.gathercomplete';
     qc.on(gatherEvent, function() {
-      failureTracking.haveCompletedGather[peerId] = true;
-      failureTracking.checkDoomCountdown(peerId);
+      failureTracker(peerId).gatherIsComplete();
     });
     return tc;
   }
 
   qc.on('message:endofcandidates', function(msg, peer, raw) {
-    failureTracking.haveEndedCandidates[peer.id] = true;
-    failureTracking.checkDoomCountdown(peer.id);
+    failureTracker(peer.id).candidatesHaveEnded();
   });
 
   /**
@@ -126,7 +127,7 @@ module.exports = function(qc, opts) {
         status = newStatus;
 
         if (status === 'connected') {
-          endDoomCountdown(peerId);
+          failureTracker(peer.id).reset();
         }
       }
     });
