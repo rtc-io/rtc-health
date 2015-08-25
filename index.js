@@ -118,7 +118,7 @@ module.exports = function(qc, opts) {
         emitter.emit('health:connection:status', tc, newStatus, status);
         status = newStatus;
         if (status === 'connected') {
-          tc._resetFailureConditions();
+          tc.connected();
         }
       }
     });
