@@ -27,6 +27,7 @@ module.exports = function(signallingServer) {
                 );
             t.test('connection events', function(t) {
                 t.plan(3);
+                console.log('attaching listener');
                 source.monitor.on('health:started', function(data) {
                     t.ok(true, 'peer connection started');
                     t.equal(source.connection.id, data.source, 'source peer matches connection source');
