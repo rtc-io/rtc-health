@@ -21,13 +21,19 @@ module.exports = function(signallingServer) {
 
             var source = peers[0];
             var target = peers[1];
+            source.monitor.on('health:started', function(data) {
+              console.log('received started event');
+            });
+            target.monitor.on('health:started', function(data) {
+              console.log('received started event');
+            });
             var connectionId = (source.connection.id < target.connection.id 
                     ? source.connection.id + ':' + target.connection.id 
                     : target.connection.id + ':' + source.connection.id
                 );
             t.test('connection events', function(t) {
                 t.plan(3);
-                console.log('attaching listener');
+                console.log('attaching test listener');
                 source.monitor.on('health:started', function(data) {
                     t.ok(true, 'peer connection started');
                     t.equal(source.connection.id, data.source, 'source peer matches connection source');

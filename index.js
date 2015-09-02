@@ -85,7 +85,7 @@ module.exports = function(qc, opts) {
   function trackConnection(peerId, pc, data) {
     var tc = new MonitoredConnection(qc.id, pc, data);
     connections[data.id] = tc;
-    console.log('notifying started');
+    console.log('sending started event');
     notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
     return tc;
