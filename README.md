@@ -41,7 +41,7 @@ And finally, run the tests:
 If you do your Node development in a Docker container, you'll need to install additional system packages in order to run headless browsers for testing.
 With the standard `node` images available from Docker Hub, this is enough:
 
-    # apt-get update && apt-get install -y xvfb libgtk-3-0-dbg libasound2 libdbus-glib-1-2 libgtk2.0-0
+    # apt-get update && apt-get install -y xvfb libgtk-3-0-dbg libasound2 libdbus-glib-1-2 libgtk2.0-0 libgfonc-2-4 libnss3 libxss1
 
 Once you've set the appropriate environment variables, run the test commands prefixed with `xvfb-run`:
 
