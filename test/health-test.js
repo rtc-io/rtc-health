@@ -52,7 +52,7 @@ module.exports = function(signallingServer) {
                     t.equal(target.connection.id, report.target, 'report target matches target peer');
                     t.equal(report.room, room, 'report room matches');
                     t.equal(report.connection_id, connectionId, 'report connection id is correct');
-                    t.equal('connecting', report.status, 'connection status is connecting');         
+                    t.equal(report.status, 'connecting', 'connection status is connecting');
                     t.end();
                 });
             });  
