@@ -87,7 +87,10 @@ module.exports = function(qc, opts) {
   }
 
   function trackConnection(peerId, pc, data) {
-    var tc = new MonitoredConnection(qc, pc, data, {onFailure: connectionFailure});
+    var tc = new MonitoredConnection(qc, pc, data, {
+      timeUntilFailure: opts.connectionFailureTime,
+      onFailure: connectionFailure,
+    });
     connections[data.id] = tc;
     notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
