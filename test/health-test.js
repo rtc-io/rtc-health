@@ -6,6 +6,7 @@ var peerHelper = require('./helpers/peer');
 var connections = [];
 var dcs = [];
 var room = 'rtchealth-ut-' + require('uuid').v4();
+var Promise = require('es6-promise').Promise;
 
 // require('cog/logger').enable('*');
 module.exports = function(signallingServer) {
@@ -21,27 +22,43 @@ module.exports = function(signallingServer) {
 
             var source = peers[0];
             var target = peers[1];
+
+            // These events may fire more than once, but for this test we only
+            // care about the first occurrence of each. And because we may miss
+            // the first occurrence if we add the listener too late, we'll
+            // create the listeners here and wrap them in promises.
+            var firstSourceReport = new Promise(function(resolve, reject) {
+                source.monitor.on('health:report', function(report) {
+                    resolve(report);
+                });
+            });
+            var firstSourceStart = new Promise(function(resolve, reject) {
+                source.monitor.on('health:started', function(data) {
+                    resolve(data);
+                });
+            });
+
             var connectionId = (source.connection.id < target.connection.id 
                     ? source.connection.id + ':' + target.connection.id 
                     : target.connection.id + ':' + source.connection.id
                 );
+
             t.test('connection events', function(t) {
-                t.plan(3);
-                source.monitor.on('health:started', function(data) {
-                    t.ok(true, 'peer connection started');
+                firstSourceStart.then(function(data) {
+                    t.pass('peer connection started');
                     t.equal(source.connection.id, data.source, 'source peer matches connection source');
                     t.equal(target.connection.id, data.about, 'target peer matches connection source');
                     t.end();
-                });    
+                });
             });
 
             t.test('health report', function(t) {
-                source.monitor.on('health:report', function(report) {
+                firstSourceReport.then(function(report) {
                     t.equal(source.connection.id, report.source, 'report peer matches connection source');
                     t.equal(target.connection.id, report.target, 'report target matches target peer');
                     t.equal(report.room, room, 'report room matches');
                     t.equal(report.connection_id, connectionId, 'report connection id is correct');
-                    t.equal('connecting', report.status, 'connection status is connecting');         
+                    t.equal(report.status, 'connecting', 'connection status is connecting');
                     t.end();
                 });
             });  

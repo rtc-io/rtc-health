@@ -12,6 +12,7 @@
     "browserify": "^11.0.1",
     "cog": "^1.1.0",
     "crel": "^1",
+    "es6-promise": "^3.0.2",
     "rtc-captureconfig": "~0.4.0",
     "rtc-media": "^1",
     "rtc-quickconnect": "^4.0.0",
