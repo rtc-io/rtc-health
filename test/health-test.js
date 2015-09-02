@@ -23,22 +23,28 @@ module.exports = function(signallingServer) {
             var source = peers[0];
             var target = peers[1];
 
-            // The 'started' event may fire more than once, but for this test
-            // we only care about the first occurrence. And because we may miss
-            // the first occurrence if we add the listener too late, we'll create
-            // the listener here and promisify it.
-            var sourceStarted = new Promise(function(resolve, reject) {
-              source.monitor.on('health:started', function(data) {
-                resolve(data);
-              });
+            // These events may fire more than once, but for this test we only
+            // care about the first occurrence of each. And because we may miss
+            // the first occurrence if we add the listener too late, we'll
+            // create the listeners here and wrap them in promises.
+            var firstSourceReport = new Promise(function(resolve, reject) {
+                source.monitor.on('health:report', function(report) {
+                    resolve(report);
+                });
+            });
+            var firstSourceStart = new Promise(function(resolve, reject) {
+                source.monitor.on('health:started', function(data) {
+                    resolve(data);
+                });
             });
 
             var connectionId = (source.connection.id < target.connection.id 
                     ? source.connection.id + ':' + target.connection.id 
                     : target.connection.id + ':' + source.connection.id
                 );
+
             t.test('connection events', function(t) {
-                sourceStarted.then(function(data) {
+                firstSourceStart.then(function(data) {
                     t.pass('peer connection started');
                     t.equal(source.connection.id, data.source, 'source peer matches connection source');
                     t.equal(target.connection.id, data.about, 'target peer matches connection source');
@@ -47,7 +53,7 @@ module.exports = function(signallingServer) {
             });
 
             t.test('health report', function(t) {
-                source.monitor.on('health:report', function(report) {
+                firstSourceReport.then(function(report) {
                     t.equal(source.connection.id, report.source, 'report peer matches connection source');
                     t.equal(target.connection.id, report.target, 'report target matches target peer');
                     t.equal(report.room, room, 'report room matches');
