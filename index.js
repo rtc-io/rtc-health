@@ -122,6 +122,8 @@ module.exports = function(qc, opts) {
         status = newStatus;
         if (status === 'connected') {
           tc.connected();
+        } else if (status === 'error') {
+          tc.failed();
         }
       }
     });
