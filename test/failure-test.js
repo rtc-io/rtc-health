@@ -9,16 +9,19 @@ module.exports = function(signallingServer) {
 
     var newPeer = peerHelper.peerCreator(signallingServer, {
         room: room,
+        // Block all actual connections from occuring!
         filterCandidate: function() {
           return false;
         },
         monitorOpts: {
             pollInterval: 10000,
+            // The failure time can be arbitrary and small since connections are
+            // blocked. Long timeouts here just make the tests slower.
             connectionFailureTime: 100,
         },
     });
 
-    test('rtc-health events', function(t) {
+    test('failure tracking', function(t) {
 
         var createPeer = newPeer.bind(newPeer, t);
         async.parallel([createPeer, createPeer], function(err, peers) {
@@ -34,7 +37,8 @@ module.exports = function(signallingServer) {
                     resolve(tc);
                 });
 
-                // Timeout to keep the test from stalling.
+                // Timeout to keep the test from stalling for too long in
+                // unexpected conditions.
                 setTimeout(function() {
                     reject();
                 }, 1000);
