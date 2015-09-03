@@ -82,8 +82,15 @@ module.exports = function(qc, opts) {
     emitter.emit.apply(emitter, (['health:' + eventName, opts].concat(args)));
   }
 
+  function connectionFailure(tc) {
+    emitter.emit('health:connection:failure', tc);
+  }
+
   function trackConnection(peerId, pc, data) {
-    var tc = new MonitoredConnection(qc.id, pc, data);
+    var tc = new MonitoredConnection(qc, pc, data, {
+      timeUntilFailure: opts.connectionFailureTime,
+      onFailure: connectionFailure,
+    });
     connections[data.id] = tc;
     notify('started', { source: qc.id, about: data.id, tracker: tc });
     log(peerId, pc, data);
@@ -113,6 +120,11 @@ module.exports = function(qc, opts) {
       if (status != newStatus) {
         emitter.emit('health:connection:status', tc, newStatus, status);
         status = newStatus;
+        if (status === 'connected') {
+          tc.connected();
+        } else if (status === 'error') {
+          tc.failed();
+        }
       }
     });
 
