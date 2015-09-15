@@ -11,7 +11,7 @@ var wildcard = require('wildcard');
 
 var OPTIONAL_MONITOR_EVENTS = [
     'negotiate:request', 'negotiate:renegotiate', 'negotiate:abort',
-    'negotiate:createOffer', 'negotiate:createOffer:created', 
+    'negotiate:createOffer', 'negotiate:createOffer:created',
     'negotiate:createAnswer', 'negotiate:createAnswer:created',
     'negotiate:setlocaldescription',
     'icecandidate:local', 'icecandidate:remote', 'icecandidate:gathered', 'icecandidate:added',
@@ -23,7 +23,7 @@ var OPTIONAL_MONITOR_EVENTS = [
 
   The `rtc-health` module helps make it easier to expose health information
   about your RTC connections. It hooks into the WebRTC Stats API, as well as the
-  underlying signaller and PeerConnection events to provide insight as to events, 
+  underlying signaller and PeerConnection events to provide insight as to events,
   and metrics about any peer connections initiated by the provided quickconnect instance.
 
   ## Example Usage
@@ -60,16 +60,16 @@ module.exports = function(qc, opts) {
       if (tc) {
         timers[data.id] = setTimeout(log.bind(this, peerId, pc, data), emitter.pollInterval);
       }
-      
+
       var reporter = new Reporter({
-            source: qc.id, 
+            source: qc.id,
             about: data,
             pc: pc,
             reports: reports
           });
 
       emitter.emit('health:report', reporter, pc);
-    });   
+    });
   }
 
   /**
@@ -102,7 +102,7 @@ module.exports = function(qc, opts) {
    **/
   qc.on('peer:connect', trackConnection);
 
-  qc.on('peer:couple', function(peerId, pc, data, monitor) {    
+  qc.on('peer:couple', function(peerId, pc, data, monitor) {
 
     // Store that we are currently tracking the target peer
     var tc = connections[data.id];
@@ -112,8 +112,8 @@ module.exports = function(qc, opts) {
     monitor.on('statechange', function(pc, state) {
       var iceConnectionState = pc.iceConnectionState;
       var newStatus = util.toStatus(iceConnectionState);
-      notify('icestatus', { 
-        source: qc.id, about: data.id, tracker: tc 
+      notify('icestatus', {
+        source: qc.id, about: data.id, tracker: tc
       }, iceConnectionState);
       emitter.emit('health:changed', tc, iceConnectionState);
 
@@ -129,7 +129,7 @@ module.exports = function(qc, opts) {
     });
 
     monitor.on('closed', function() {
-      
+
       tc.closed();
 
       // Stop the reporting for this peer connection
@@ -138,7 +138,7 @@ module.exports = function(qc, opts) {
 
       // Emit a closure status update
       emitter.emit('health:report', new Reporter({
-        source: qc.id, 
+        source: qc.id,
         about: data,
         status: 'closed',
         force: true
@@ -155,7 +155,7 @@ module.exports = function(qc, opts) {
 
     if (util.SIGNALLER_EVENTS.indexOf(name) >= 0) {
       return notify.apply(
-        notify, 
+        notify,
         [name, { source: qc.id, about: 'signaller' }].concat(evt.args)
       );
     }
@@ -167,7 +167,7 @@ module.exports = function(qc, opts) {
       var shortName = matching.slice(2).join('.');
       var tc = connections[peerId];
       return notify.apply(
-        notify, 
+        notify,
         [shortName, { source: qc.id, about: peerId, tracker: tc }].concat(evt.args)
       );
     }
@@ -187,7 +187,12 @@ module.exports = function(qc, opts) {
       results.push(connections[target]);
     }
     return results;
-  }
+  };
+
+  // Get the tracked connection for the given target peer
+  emitter.getConnection = function(target) {
+    return connections && connections[target];
+  };
 
   return emitter;
 };
