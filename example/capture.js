@@ -17,8 +17,8 @@ localMedia.render(local);
 
 localMedia.once('capture', function(stream) {
 
-	var qc = window.qc = 
-	quickconnect('http://rtc.io/switchboard/', { 
+	var qc = window.qc =
+	quickconnect('http://rtc.io/switchboard/', {
 		room: 'health-capture',
 		iceServers: [
 		  { url: 'stun:stun.l.google.com:19302' }
@@ -66,7 +66,7 @@ localMedia.once('capture', function(stream) {
 	monitor.on('health:notify', function(evt, opts, data) {
 		// console.log('[%s->%s] %s', opts.source, opts.about, evt);
 		// if (data) {
-		// 	console.log(JSON.stringify(data));	
+		// 	console.log(JSON.stringify(data));
 		// }
 	});
 
