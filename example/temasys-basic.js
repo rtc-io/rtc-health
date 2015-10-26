@@ -1,10 +1,11 @@
 var quickconnect = require('rtc-quickconnect');
+var plugins = [require('rtc-plugin-temasys')];
 var health = require('../');
 var crel = require('crel');
-var xhr = require('xhr');
 var qc = quickconnect('http://rtc.io/switchboard/', {
-			room: 'healthexp',
-			sdpfilter: function(sdp) { append(sdp); return sdp; }
+			room: 'health-temasys-test',
+			sdpfilter: function(sdp) { append(sdp); return sdp; },
+			plugins: plugins
 		 });
 
 var monitor = health(qc, { pollInterval: 10000 });
@@ -15,8 +16,24 @@ function append(msg) {
 	crel(logger, crel('p', msg));
 }
 
-qc.on('channel:opened', function(id) {
+qc.on('channel:opened', function(id, dc) {
+	console.log(arguments)
 	append('channel opened ' + id);
+	dc.onmessage = function(msg) {
+		if (msg && msg.data) append(msg.data);
+	};
+
+	function ping() {
+		console.log('ping');
+		dc.send(new Date().toUTCString() + ' - ping');
+		setTimeout(ping, 1000);
+	}
+
+	if (dc.readyState !== 'open') {
+		dc.onopen = ping;
+	} else {
+		ping();
+	}
 });
 
 var filter = ['bytesReceived', 'bytesSent'];
@@ -44,5 +61,7 @@ monitor.on('health:report', function(reporter, pc) {
 		console.log(report.toJSON());
 	}
 });
+
+qc.createDataChannel('chat', {ordered: true});
 
 append('started');
