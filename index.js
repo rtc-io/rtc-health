@@ -6,7 +6,7 @@ var Reporter = require('./lib/reporter');
 var MonitoredConnection = require('./lib/connection').MonitoredConnection;
 var error = require('./lib/error');
 var util = require('./lib/util');
-var provider = require('./lib/provider');
+var detectProvider = require('./lib/provider');
 var wildcard = require('wildcard');
 
 var OPTIONAL_MONITOR_EVENTS = [
@@ -39,13 +39,9 @@ var OPTIONAL_MONITOR_EVENTS = [
 **/
 module.exports = function(qc, opts) {
 
-  if (!provider) {
-    console.log('WARNING! No WebRTC provider detected - rtc-health is disabled');
-    return;
-  }
-
   opts = opts || {};
 
+  var provider = null;
   var emitter = new EventEmitter();
   emitter.pollInterval = opts.pollInterval || 1000;
   var connections = {};
@@ -53,6 +49,11 @@ module.exports = function(qc, opts) {
   var logs = {};
 
   function log(peerId, pc, data) {
+    // A provider must be present for logging to be enabled
+    if (!provider) {
+      return;
+    }
+
     provider.getStats(pc, null, function(err, reports) {
       var tc = connections[data.id];
 
@@ -194,5 +195,20 @@ module.exports = function(qc, opts) {
     return connections && connections[target];
   };
 
+  // Provider detection
+  function detect() {
+    provider = detectProvider();
+    if (!provider) {
+      console.log('WARNING! No WebRTC provider detected - rtc-health is disabled until a provider is detected');
+    }
+  }
+
+  // In the case of some plugins, we don't get notified that it's using a plugin, and
+  // have no means to reasonably identify the existence of a plugin
+  // So as a final fallback, rerun the detection on a local announce
+  qc.once('local:announce', detect);
+
+  // Attempt to detect initially
+  detect();
   return emitter;
 };
