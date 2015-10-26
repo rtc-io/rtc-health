@@ -23,8 +23,7 @@ localMedia.once('capture', function(stream) {
 		iceServers: [
 		  { url: 'stun:stun.l.google.com:19302' }
 		],
-		disableHeartbeat: true,
-		plugins: [require('rtc-plugin-temasys')]
+		disableHeartbeat: true
 	}).addStream(stream)
 	.on('stream:added', function(id, stream) {
 		console.log('added %s', id);
