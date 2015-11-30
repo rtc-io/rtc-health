@@ -1,6 +1,6 @@
 {
   "name": "rtc-health",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Exposes health information about WebRTC connection statistics as quickconnect module",
   "main": "index.js",
   "scripts": {
