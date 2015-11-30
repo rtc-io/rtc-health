@@ -99,6 +99,30 @@ module.exports = function(qc, opts) {
   }
 
   /**
+    Handles connection closures, either as a result of the peer connection
+    disconnecting, or the call ending (prior to a PC being created)
+   **/
+  function connectionClosed(peerId) {
+    var tc = connections[peerId];
+    if (!tc) return;
+    tc.closed();
+
+    // Stop the reporting for this peer connection
+    if (timers[peerId]) clearTimeout(timers[peerId]);
+    delete connections[peerId];
+
+    // Emit a closure status update
+    emitter.emit('health:report', new Reporter({
+      source: qc.id,
+      about: peerId,
+      status: 'closed',
+      force: true
+    }));
+
+    notify('closed', { source: qc.id, about: peerId, tracker: tc });
+  }
+
+  /**
     Handle the peer connection being created
    **/
   qc.on('peer:connect', trackConnection);
@@ -129,26 +153,11 @@ module.exports = function(qc, opts) {
       }
     });
 
-    monitor.on('closed', function() {
-
-      tc.closed();
-
-      // Stop the reporting for this peer connection
-      if (timers[data.id]) clearTimeout(timers[data.id]);
-      delete connections[data.id];
-
-      // Emit a closure status update
-      emitter.emit('health:report', new Reporter({
-        source: qc.id,
-        about: data,
-        status: 'closed',
-        force: true
-      }));
-
-      notify('closed', { source: qc.id, about: data.id, tracker: tc });
-    });
-
+    monitor.on('closed', connectionClosed.bind(this, peerId));
   });
+
+  // Close tracked connections on call:ended as well
+  qc.on('call:ended', connectionClosed);
 
   // Setup to listen to the entire feed
   qc.feed(function(evt) {
