@@ -15,7 +15,7 @@ exports.peerCreator = function(signallingServer, opts) {
 	        t.ok(connection, 'new quickconnect created');
 	        var monitor = health(connection, opts.monitorOpts || { pollInterval: 10000 });
 	        t.ok(monitor, 'monitor attached');
-	        return callback(null, { connection: connection, monitor: monitor } );  
+	        return callback(null, { connection: connection, monitor: monitor } );
 	    });
 	};
 }
