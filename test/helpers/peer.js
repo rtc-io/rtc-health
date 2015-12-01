@@ -6,6 +6,7 @@ exports.peerCreator = function(signallingServer, opts) {
 	opts = opts || {};
 	return function(t, callback) {
 	    t.test('create a new peer', function(t) {
+	    	console.log('create peer');
 	        t.plan(3);
 	        var sig = signaller(require('rtc-switchboard-messenger')(signallingServer));
 	        sig.once('connected', function() {
@@ -15,7 +16,7 @@ exports.peerCreator = function(signallingServer, opts) {
 	        t.ok(connection, 'new quickconnect created');
 	        var monitor = health(connection, opts.monitorOpts || { pollInterval: 10000 });
 	        t.ok(monitor, 'monitor attached');
-	        return callback(null, { connection: connection, monitor: monitor } );  
+	        return callback(null, { connection: connection, monitor: monitor } );
 	    });
 	};
 }

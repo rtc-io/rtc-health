@@ -83,8 +83,9 @@ module.exports = function(qc, opts) {
     emitter.emit.apply(emitter, (['health:' + eventName, opts].concat(args)));
   }
 
-  function connectionFailure(tc) {
-    emitter.emit('health:connection:failure', tc);
+  function connectionFailure() {
+    var args = Array.prototype.slice.call(arguments);
+    emitter.emit.apply(emitter, ['health:connection:failure'].concat(args));
   }
 
   function trackConnection(peerId, pc, data) {
@@ -148,7 +149,7 @@ module.exports = function(qc, opts) {
         if (status === 'connected') {
           tc.connected();
         } else if (status === 'error') {
-          tc.failed();
+          tc.failed('ICE connection state error');
         }
       }
     });

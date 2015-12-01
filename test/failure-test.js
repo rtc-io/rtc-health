@@ -25,7 +25,7 @@ module.exports = function(signallingServer) {
 
         var createPeer = newPeer.bind(newPeer, t);
         async.parallel([createPeer, createPeer], function(err, peers) {
-                
+
             t.ok(peers.length === 2, 'two peers created');
 
             var source = peers[0];
