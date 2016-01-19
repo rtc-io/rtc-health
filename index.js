@@ -157,6 +157,11 @@ module.exports = function(qc, opts) {
     monitor.on('closed', connectionClosed.bind(this, peerId));
   });
 
+  qc.on('call:failed', function(peerId) {
+    var tc = connections[peerId];
+    tc.failed('Call failed to connect');
+  });
+
   // Close tracked connections on call:ended as well
   qc.on('call:ended', connectionClosed);
 
