@@ -41,7 +41,7 @@ module.exports = function(signallingServer) {
                 // unexpected conditions.
                 setTimeout(function() {
                     reject();
-                }, 1000);
+                }, 2000);
             });
 
             t.test('track connection failure', function(t) {
