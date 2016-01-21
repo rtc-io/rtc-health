@@ -1,11 +1,12 @@
 var test = require('tape');
 var async = require('async');
 var peerHelper = require('./helpers/peer');
-var room = 'rtchealth-ut-' + require('uuid').v4();
 var Promise = require('es6-promise').Promise;
 
 // require('cog/logger').enable('*');
 module.exports = function(signallingServer) {
+
+    var room = 'rtchealth-ut-' + require('uuid').v4();
 
     var newPeer = peerHelper.peerCreator(signallingServer, {
         room: room,
