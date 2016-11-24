@@ -115,7 +115,10 @@ module.exports = function(qc, opts) {
     // Emit a closure status update
     emitter.emit('health:report', new Reporter({
       source: qc.id,
-      about: peerId,
+      about: {
+        id: peerId,
+        room: tc.room
+      },
       status: 'closed',
       force: true
     }));
