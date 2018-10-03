@@ -18,7 +18,7 @@ localMedia.render(local);
 localMedia.once('capture', function(stream) {
 
 	var qc = window.qc =
-	quickconnect('http://rtc.io/switchboard/', {
+	quickconnect('http://localhost:3000/', {
 		room: 'health-capture',
 		iceServers: [
 		  { url: 'stun:stun.l.google.com:19302' }

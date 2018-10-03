@@ -37,6 +37,7 @@
   ],
   "dependencies": {
     "async": "^0.9.0",
+    "bowser": "^1.9.4",
     "debounce": "^1.0.0",
     "eventemitter3": "^1.1.1",
     "humps": "^0.4.2",
