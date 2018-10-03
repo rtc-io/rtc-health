@@ -215,7 +215,7 @@ module.exports = function(qc, opts) {
 
   // Provider detection
   function detect() {
-    provider = detectProvider();
+    provider = detectProvider(opts);
     if (!provider) {
       console.log('WARNING! No WebRTC provider detected - rtc-health is disabled until a provider is detected');
     }
