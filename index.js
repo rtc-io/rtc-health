@@ -6,8 +6,8 @@ var Reporter = require('./lib/reporter');
 var MonitoredConnection = require('./lib/connection').MonitoredConnection;
 var error = require('./lib/error');
 var util = require('./lib/util');
-var detectProvider = require('./lib/provider');
 var wildcard = require('wildcard');
+const detectProvider = require('./stats');
 
 var OPTIONAL_MONITOR_EVENTS = [
     'negotiate:request', 'negotiate:renegotiate', 'negotiate:abort',
@@ -49,13 +49,9 @@ module.exports = function(qc, opts) {
   var logs = {};
 
   function log(peerId, pc, data) {
-    // A provider must be present for logging to be enabled
-    if (!provider) {
-      return;
-    }
-
-    provider.getStats(pc, null, function(err, reports) {
-      var tc = connections[data.id];
+    if (!provider) return;
+    return provider.getStats(pc).then((reports) => {
+      const tc = connections[data.id];
 
       // Only reschedule while we are monitoring
       if (tc) {
@@ -70,6 +66,8 @@ module.exports = function(qc, opts) {
           });
 
       emitter.emit('health:report', reporter, pc);
+    }).catch((err) => {
+      // No operation
     });
   }
 
