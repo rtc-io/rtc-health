@@ -26,7 +26,7 @@ module.exports = function(qc, opts) {
         // Add a compatibility stat in (not quite the same, as this is purely based off the data that is being sent, as opposed to
         // the potential, so named differently but possibly should just be the availableOutgoingBitrate for compatibility)
         candidatePair.data.rtcOutgoingBitrateMean = outboundRtp.reduce((result, report) => {
-          return result + report.data.bitrateMean;
+          return result + (report.data.bitrateMean || 0);
         }, 0);
       }
 
