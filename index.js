@@ -39,8 +39,6 @@ var OPTIONAL_MONITOR_EVENTS = [
 **/
 module.exports = function(qc, opts) {
 
-  console.log('### in local rtc-health 222 ###');
-
   opts = opts || {};
 
   var provider = null;
@@ -56,7 +54,6 @@ module.exports = function(qc, opts) {
     return provider.getStats(pc)
       .then(reports => provider.pushCustomCoviuStats(reports))
       .then(reports => {
-        console.log('### reports-- ', reports);
         const tc = connections[data.id];
 
         // Only reschedule while we are monitoring
@@ -74,7 +71,7 @@ module.exports = function(qc, opts) {
         emitter.emit('health:report', reporter, pc);
       })
       .catch(err => { 
-        console.log('### err-- ', err);
+        // No operation
       });
   }
 
