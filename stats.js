@@ -1,5 +1,6 @@
 /* jshint node: true */
 const detectProvider = require('./lib/provider');
+const deriveRenderRateVolatility = require('./lib/custom-stats/render-rate-volatility');
 
 module.exports = function(qc, opts) {
 
@@ -34,5 +35,13 @@ module.exports = function(qc, opts) {
     });
   }
 
-  return { provider, getStats, getConnectionStats };
+  const pushCustomCoviuStats = (stats) => {
+    return Promise.resolve()
+      .then(() => deriveRenderRateVolatility(stats))
+      .then(renderRateVolitilityStats => {
+        return [...stats, ...renderRateVolitilityStats];
+      });
+  };
+
+  return { provider, getStats, getConnectionStats, pushCustomCoviuStats };
 };
