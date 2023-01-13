@@ -39,6 +39,8 @@ var OPTIONAL_MONITOR_EVENTS = [
 **/
 module.exports = function(qc, opts) {
 
+  console.log('### in local rtc-health 222 ###');
+
   opts = opts || {};
 
   var provider = null;
@@ -50,25 +52,30 @@ module.exports = function(qc, opts) {
 
   function log(peerId, pc, data) {
     if (!provider) return;
-    return provider.getStats(pc).then((reports) => {
-      const tc = connections[data.id];
 
-      // Only reschedule while we are monitoring
-      if (tc) {
-        timers[data.id] = setTimeout(log.bind(this, peerId, pc, data), emitter.pollInterval);
-      }
+    return provider.getStats(pc)
+      .then(reports => provider.pushCustomCoviuStats(reports))
+      .then(reports => {
+        console.log('### reports-- ', reports);
+        const tc = connections[data.id];
 
-      var reporter = new Reporter({
-            source: qc.id,
-            about: data,
-            pc: pc,
-            reports: reports
-          });
+        // Only reschedule while we are monitoring
+        if (tc) {
+          timers[data.id] = setTimeout(log.bind(this, peerId, pc, data), emitter.pollInterval);
+        }
 
-      emitter.emit('health:report', reporter, pc);
-    }).catch((err) => {
-      // No operation
-    });
+        var reporter = new Reporter({
+              source: qc.id,
+              about: data,
+              pc: pc,
+              reports: reports
+            });
+
+        emitter.emit('health:report', reporter, pc);
+      })
+      .catch(err => { 
+        console.log('### err-- ', err);
+      });
   }
 
   /**
